@@ -14,15 +14,16 @@ public:
 
 	SDL_Surface* screen;
 	int depth;
-	std::vector<Particle> particles;
+	std::vector<Particle*> particles;
 	SDL_Rect bounds;
 	Quadtree* quads[4]{ nullptr };
 
 	void clear();
 	void split();
-	const int getIndex(const Particle &a_obj);
-	void insert(const Particle &a_obj);
-	std::vector<Particle*> retrieve(std::vector<Particle*>& returnObjs, Particle &a_obj);
+	int getIndex(Particle* a_obj);
+	void insert(Particle* a_obj);
+	std::vector<Particle*> retrieve(std::vector<Particle*>& returnObjs, Particle* a_obj);
+	void getSingleFromAllQuads(std::vector<Particle*>& particles);
 	void Draw();
 };
 

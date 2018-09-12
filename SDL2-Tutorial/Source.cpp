@@ -67,7 +67,7 @@ int main(int argc, char* args[])
 				exit = true;
 				continue;
 			}
-			if (e.type == SDL_MOUSEBUTTONDOWN) {
+			if (e.type == SDL_MOUSEMOTION) {
 				int x, y;
 				SDL_GetMouseState(&x, &y);
 
@@ -80,9 +80,17 @@ int main(int argc, char* args[])
 		SDL_FillRect(gScreenSurface, NULL, SDL_MapRGB(gScreenSurface->format, 255, 255, 255));
 
 		quad.clear();
+		
 		for (auto & p : particles) {
-			quad.insert(p);
-			
+			quad.insert(&p);
+			p.Tick();
+			p.Draw();
+		}
+		
+		std::vector<Particle*> tmp;
+		quad.getSingleFromAllQuads(tmp);
+		for (auto & p : tmp) {
+
 			std::vector<Particle*> returnObjs;
 			quad.retrieve(returnObjs, p);
 
@@ -95,23 +103,27 @@ int main(int argc, char* args[])
 						}
 						Particle* p = returnObjs[i];
 						Particle* r_p = returnObjs[j];
+
+						if (p->velocity.x == 0 && p->velocity.y == 0 && r_p->velocity.x == 0 && r_p->velocity.y == 0) {
+							continue;
+						}
+
 						if (p->position.x + 3 >= r_p->position.x && p->position.x < r_p->position.x + 3 && p->position.y + 3 > r_p->position.y && p->position.y < r_p->position.y + 3) {
-							p->velocity.x *= -1;
-							p->velocity.y *= -1;
+							p->velocity.x = 0;
+							p->velocity.y = 0;
+							r_p->velocity.x = 0;
+							r_p->velocity.y = 0;
 						}
 					}
 				}
 			}
-
-			p.Tick();
-			p.Draw();
 		}
 		
 		quad.Draw();
 		
 		SDL_UpdateWindowSurface(gWindow);
 
-		SDL_Delay(5);
+		//SDL_Delay(5);
 	}
 
 	close();

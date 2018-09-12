@@ -34,15 +34,15 @@ void Quadtree::split() {
 	quads[3] = new Quadtree(depth + 1, { x + s_width, y + s_height, s_width, s_height }, screen);
 }
 
-const int Quadtree::getIndex(const Particle & a_obj) {
+int Quadtree::getIndex(Particle* a_obj) {
 	int index = -1;
 	double verticalMiddle = bounds.x + (bounds.w / 2);
 	double horizontalMiddle = bounds.y + (bounds.h / 2);
 
-	bool topQuadrant = (a_obj.position.y < horizontalMiddle && a_obj.position.y + 3 < horizontalMiddle);
-	bool botQuadrant = (a_obj.position.y > horizontalMiddle);
+	bool topQuadrant = (a_obj->position.y < horizontalMiddle && a_obj->position.y + 3 < horizontalMiddle);
+	bool botQuadrant = (a_obj->position.y > horizontalMiddle);
 
-	if (a_obj.position.x < verticalMiddle && a_obj.position.x + 3 < verticalMiddle) {
+	if (a_obj->position.x < verticalMiddle && a_obj->position.x + 3 < verticalMiddle) {
 		if (topQuadrant) {
 			index = 1;
 		} else if (botQuadrant) {
@@ -50,7 +50,7 @@ const int Quadtree::getIndex(const Particle & a_obj) {
 		}
 	}
 
-	else if (a_obj.position.x > verticalMiddle) {
+	else if (a_obj->position.x > verticalMiddle) {
 		if (topQuadrant) {
 			index = 0;
 		}
@@ -62,7 +62,7 @@ const int Quadtree::getIndex(const Particle & a_obj) {
 	return index;
 }
 
-void Quadtree::insert(const Particle & a_obj) {
+void Quadtree::insert(Particle* a_obj) {
 	if (quads[0] != nullptr) {
 		int index = getIndex(a_obj);
 
@@ -94,20 +94,29 @@ void Quadtree::insert(const Particle & a_obj) {
 	}
 }
 
-std::vector<Particle*> Quadtree::retrieve(std::vector<Particle*>& returnObjs, Particle & a_obj) {
+std::vector<Particle*> Quadtree::retrieve(std::vector<Particle*>& returnObjs, Particle* a_obj) {
 	int index = getIndex(a_obj);
 	if (index != -1 && quads[0] != nullptr) {
 		quads[index]->retrieve(returnObjs, a_obj);
 	}
 
-	std::vector<Particle*> tmp;
 	for (auto p : particles) {
-		tmp.push_back(&p);
+		returnObjs.push_back(p);
 	}
 
-	returnObjs.insert(returnObjs.end(), tmp.begin(), tmp.end());
-
 	return returnObjs;
+}
+
+void Quadtree::getSingleFromAllQuads(std::vector<Particle*>& particles) {
+	if (this->particles.size() > 0) {
+		particles.push_back(this->particles.at(0));
+	}
+
+	if (quads[0] != nullptr) {
+		for (int i = 0; i < 4; i++) {
+			quads[i]->getSingleFromAllQuads(particles);
+		}
+	}
 }
 
 void Quadtree::Draw() {
